@@ -138,7 +138,6 @@ def store_first_access_data():
         )
         db.session.add(series_rating)
 
-    user.is_new_user = False
     db.session.commit()
 
     return (
@@ -150,3 +149,24 @@ def store_first_access_data():
         ),
         201,
     )
+
+@user_bp.route("/user/<int:user_id>", methods=["GET"])
+def get_user(user_id):
+    """
+    Get a user by ID.
+
+    Route: /user/<int:user_id>
+    Method: GET
+
+    Returns:
+        dict: A dictionary containing the details of the user.
+
+    Status Codes:
+        200: Successfully retrieved the user.
+        404: User not found.
+    """
+    user = User.query.get(user_id)
+    if not user:
+        raise APIException("User not found", status_code=404)
+
+    return jsonify(user.serialize())

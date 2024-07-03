@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float
+import pandas as pd
 
 from api import db
 
@@ -10,12 +11,10 @@ class Serie(db.Model):
     director = Column(String(300))
     cast = Column(String(1000))
     country = Column(String(300))
-    date_added = Column(String(100))
     age_rating = Column(String(10))
     listed_in = Column(String(300))
     description = Column(String(2000))
     imdb_id = Column(String(20))
-    is_adult = Column(Integer)
     start_year = Column(Integer)
     runtime_minutes = Column(Integer)
     genres = Column(String(300))
@@ -26,7 +25,8 @@ class Serie(db.Model):
     seasons = Column(Integer)
     poster_url = Column(String(300))
     youtube_trailers = Column(String(1000))
-    popularity = Column(Float)                               
+    popularity = Column(Float)
+    user_ratings = db.relationship("SerieUserRating", backref="serie", lazy=True)
 
     def __repr__(self):
         return "<Serie %r>" % self.title
@@ -38,12 +38,10 @@ class Serie(db.Model):
             "director": self.director,
             "cast": self.cast,
             "country": self.country,
-            "date_added": self.date_added,
             "age_rating": self.age_rating,
             "listed_in": self.listed_in,
             "description": self.description,
             "imdb_id": self.imdb_id,
-            "is_adult": self.is_adult,
             "start_year": self.start_year,
             "runtime_minutes": self.runtime_minutes,
             "genres": self.genres,

@@ -11,7 +11,6 @@ class User(db.Model):
     email = Column(String(120), unique=True)
     password = Column(String(240))
     age = Column(Integer)
-    is_new_user = Column(Boolean, default=True)
     movies_ratings = relationship("MovieUserRating", backref="user", lazy=True)
     series_ratings = relationship("SerieUserRating", backref="user", lazy=True)
     favorite_genres = Column(String(300))
@@ -25,5 +24,5 @@ class User(db.Model):
             "username": self.username,
             "email": self.email,
             "age": self.age,
-            "is_new_user": self.is_new_user,
+            "favorite_genres": self.favorite_genres,
         }
