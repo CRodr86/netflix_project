@@ -553,3 +553,43 @@ def recommend_series():
                     break
 
     return jsonify(series_by_genre)
+
+
+@serie_bp.route("last-rated-serie/<int:user_id>", methods=["GET"])
+def get_last_rated_serie(user_id):
+    """
+    Get the last serie rated by a user.
+
+    Route: /last-rated-serie/<int:user_id>
+    Method: GET
+
+    Returns:
+        dict: A dictionary containing the details of the last rated serie. First check if the rating is "Me encanta",
+              then "Me gusta", if not, return an empty dictionary.
+
+    Status Codes:
+        200: Successfully retrieved the last rated serie.
+        404: User not found.
+    """
+    
+    # Check if the user exists
+    user = User.query.get(user_id)
+    if not user:
+        raise APIException("User not found", status_code=404)
+
+    # Retrieve the last serie rated "Me encanta" by the user
+    last_loved_serie = SerieUserRating.query.filter_by(user_id=user_id, rating="Me encanta").order_by(SerieUserRating.date_rated.desc()).first()
+    
+    if last_loved_serie:
+        serie = Serie.query.get(last_loved_serie.serie_id)
+        return jsonify(serie.serialize())
+
+    # If no "Me encanta" serie found, retrieve the last serie rated "Me gusta" by the user
+    last_liked_serie = SerieUserRating.query.filter_by(user_id=user_id, rating="Me gusta").order_by(SerieUserRating.date_rated.desc()).first()
+    
+    if last_liked_serie:
+        serie = Serie.query.get(last_liked_serie.serie_id)
+        return jsonify(serie.serialize())
+    
+    # If no "Me encanta" or "Me gusta" serie found, return an empty dictionary
+    return jsonify({})

@@ -553,3 +553,43 @@ def recommend_movies():
                     break
 
     return jsonify(movies_by_genre)
+
+
+@movie_bp.route("last-rated-movie/<int:user_id>", methods=["GET"])
+def get_last_rated_movie(user_id):
+    """
+    Get the last movie rated by a user.
+
+    Route: /last-rated-movie/<int:user_id>
+    Method: GET
+
+    Returns:
+        dict: A dictionary containing the details of the last rated movie. First check if the rating is "Me encanta",
+              then "Me gusta", if not, return an empty dictionary.
+
+    Status Codes:
+        200: Successfully retrieved the last rated movie.
+        404: User not found.
+    """
+    
+    # Check if the user exists
+    user = User.query.get(user_id)
+    if not user:
+        raise APIException("User not found", status_code=404)
+
+    # Retrieve the last movie rated "Me encanta" by the user
+    last_loved_movie = MovieUserRating.query.filter_by(user_id=user_id, rating="Me encanta").order_by(MovieUserRating.date_rated.desc()).first()
+    
+    if last_loved_movie:
+        movie = Movie.query.get(last_loved_movie.movie_id)
+        return jsonify(movie.serialize())
+
+    # If no "Me encanta" movie found, retrieve the last movie rated "Me gusta" by the user
+    last_liked_movie = MovieUserRating.query.filter_by(user_id=user_id, rating="Me gusta").order_by(MovieUserRating.date_rated.desc()).first()
+    
+    if last_liked_movie:
+        movie = Movie.query.get(last_liked_movie.movie_id)
+        return jsonify(movie.serialize())
+    
+    # If no "Me encanta" or "Me gusta" movie found, return an empty dictionary
+    return jsonify({})
